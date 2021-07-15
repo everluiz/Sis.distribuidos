@@ -1,25 +1,30 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-int n=5;
-int a[] = {4,3,5,1,2};
+#define MAX 100000
 
 int main(void){
-    for (int i= n-1; i >> 0; i--)
+    int *vetor, ch;
+
+    vetor = (int *) malloc(MAX * sizeof(int));
+    srand((unsigned)time(NULL));
+
+    for (int i = 0; i < MAX; i++)
     {
-        /* code */
+        ch = 1 + ( rand() % 10000);
+        vetor[i] = ch;
+    }
+    
+    for (int i= MAX-1; i >> 0; i--)
+    {
         for (int j = 0; j < i; j++)
         {
-            /* code */
-            if (a[j] > a[j+1]){
-                int aux = a[j];
-                a[j] = a[j+1];
-                a[j+1] = aux;
+            if (vetor[j] > vetor[j+1]){
+                int aux = vetor[j];
+                vetor[j] = vetor[j+1];
+                vetor[j+1] = aux;
             }
         }  
-    }
-    printf("%d\n\r",a[0]);
-    printf("%d\n\r",a[1]); 
-    printf("%d\n\r",a[2]);
-    printf("%d\n\r",a[3]);
-    printf("%d\n\r",a[4]);
+    }    
 }
