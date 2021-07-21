@@ -1,51 +1,69 @@
-#include <omp.h>
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
+#include <time.h>
+#include <omp.h>
 
-int main()
-{
-        int i, n, tmp, *x, changes;
-        int chunk;
-        scanf("%d ", &n);
-        chunk = n / 4;
-        x = (int*) malloc(n * sizeof(int));
-        for(i = 0; i < n; ++i)
-            scanf("%d ", &x[i]);
-    changes = 1;
-    int nr = 0;
-    while(changes)
+#define MAX 100000
+#define THREADS 4
+
+void bubble_par(int vet[]){
+    int first;
+    double start = omp_get_wtime();
+    for (int i = 0; i < MAX; i++)
     {
-    #pragma omp parallel private(tmp)
-    {
-            nr++;
-            changes = 0;
-            #pragma omp for \
-                    reduction(+:changes)
-            for(i = 0; i < n - 1; i = i + 2)
-            {
-                    if(x[i] > x[i+1] )
-                    {
-                            tmp = x[i];
-                            x[i] = x[i+1];
-                            x[i+1] = tmp;
-                            ++changes;
-                    }
+        first = i % 2; 
+        // 0 para 0,2,4...
+        // 1 para 1,3,5...
+        #pragma omp parallel for shared(vet, first),num_threads(THREADS) 
+        for (int j = first; j < MAX-1; j+=2)
+        {
+            if(vet[j] > vet[j+1]){
+                int aux = vet[j];
+                vet[j] = vet[j+1];
+                vet[j+1] = aux;
             }
-            #pragma omp for \
-                    reduction(+:changes)
-            for(i = 1; i < n - 1; i = i + 2)
-            {
-                    if( x[i] > x[i+1] )
-                    {
-                            tmp = x[i];
-                            x[i] = x[i+1];
-                            x[i+1] = tmp;
-                            ++changes;
-                    }
-            }
+        } 
     }
+    double end = omp_get_wtime();
+    printf("tempo para %d threads: %f\n\n", THREADS, end-start);
+}
+
+void imprime(int vet[]){
+    for (int i = 0; i < MAX; i++)
+    {
+        if (i<30)
+        {
+            printf("%d ", vet[i]);
+        }else if (i == 31)
+        {
+            printf("-- ");
+        }else if (i > (MAX-30)){
+            printf("%d ", vet[i]);
+        }
+    }
+    
+}
+
+
+int main(void){
+    int *vetor, ch;
+
+    vetor = (int *) malloc(MAX * sizeof(int));
+    srand((unsigned)time(NULL));
+
+    // Cria vetor randomizado de 1 a 100000.
+    for (int i = 0; i < MAX; i++)
+    {
+        ch = 1 + ( rand() % MAX);
+        vetor[i] = ch;
     }
 
-    return 0;
+    imprime(vetor);
+    printf("\n\n");
+    // chama a funcao bubblesort
+    bubble_par(vetor);
+
+    imprime(vetor);
+    free(vetor);    
+    return 0;    
 }
